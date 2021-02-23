@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: ./docker/php
+    volumes:
+      - ./workspace:/var/www/workspace
+ 
+  nginx:
+    build:
+      context: ./docker/nginx
+    ports:
+      - 8000:80
+    depends_on:
+      - app
+    volumes:
+      - ${NGINX_CONF_PATH}/php.conf:/etc/nginx/conf.d/php.conf
+      # - ./workspace:/var/www/workspace
+  
+  mysql:
+    build:
+      context: ./docker/mysql
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ${DATA_SAVE_PATH}/mysql:/var/lib/mysql
+      - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+    ports:
+      - ${MYSQL_PORT}:3306
+
+  # mailhog:
+  #   image: mailhog/mailhog
+  #   ports:
+  #     - 80250:8025
+  
+  # metabase:
+  #   image: metabase/metabase:latest
+  #   container_name: metabase
+  #   ports:
+  #     - 31000:3000
+  #   volumes:
+  #     - ./data/metabase:/mnt/data
+ 
